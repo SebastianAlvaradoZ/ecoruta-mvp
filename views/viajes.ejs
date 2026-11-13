@@ -32,6 +32,13 @@
       </div>
       <p class="horas"><strong><%= v.fecha_texto %></strong> · Sale <%= v.salida %> · Llega <%= v.llegada %></p>
       <p class="muted">Conductor: <%= v.conductor %></p>
+      <% if (usuario.rol === 'pasajero') { %>
+        <% if (reservados.has(v.id)) { %>
+          <span class="chip">Ya reservaste este viaje</span>
+        <% } else { %>
+          <form method="post" action="/viajes/<%= v.id %>/reservar"><button type="submit">Reservar</button></form>
+        <% } %>
+      <% } %>
     </article>
   <% }) %>
 </div>

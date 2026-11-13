@@ -1,0 +1,18 @@
+<%- include('partials/cabecera') %>
+<section class="tarjeta">
+  <h1>Mis reservas</h1>
+  <p class="sub">Viajes en los que tienes un cupo asegurado.</p>
+</section>
+<% if (reservas.length === 0) { %>
+  <section class="tarjeta vacio">Todavía no tienes reservas. <a href="/viajes">Busca un viaje</a>.</section>
+<% } %>
+<div class="lista">
+  <% reservas.forEach(function (r) { %>
+    <article class="tarjeta viaje">
+      <h2><%= r.zona %> → Tecsup</h2>
+      <p class="horas"><strong><%= r.fecha_texto %></strong> · Sale <%= r.salida %> · Llega <%= r.llegada %></p>
+      <p class="muted">Conductor: <%= r.conductor %></p>
+    </article>
+  <% }) %>
+</div>
+<%- include('partials/pie') %>

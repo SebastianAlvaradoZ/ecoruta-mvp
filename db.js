@@ -37,6 +37,15 @@ async function iniciarBaseDeDatos() {
       creado_en TIMESTAMPTZ NOT NULL DEFAULT now()
     );
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS reservas (
+      id SERIAL PRIMARY KEY,
+      viaje_id INTEGER NOT NULL REFERENCES viajes(id) ON DELETE CASCADE,
+      pasajero_id INTEGER NOT NULL REFERENCES usuarios(id),
+      creado_en TIMESTAMPTZ NOT NULL DEFAULT now(),
+      UNIQUE (viaje_id, pasajero_id)
+    );
+  `);
   await sembrarUsuariosDePrueba();
 }
 
