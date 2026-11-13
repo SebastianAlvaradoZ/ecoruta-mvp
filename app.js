@@ -166,7 +166,69 @@ app.get('/viajes', requiereSesion, async (req, res) => {
       ORDER BY v.fecha, v.hora_llegada`,
     valores
   );
-  res.render('viajes', { viajes, zonas: ZONAS, filtro: { zona, llegar: llegarAntes } });
+  // Viajes que el usuario ya reservó, para no mostrarle el botón otra vez.
+  const { rows: mias } = await pool.query('SELECT viaje_id FROM reservas WHERE pasajero_id = $1', [req.session.usuario.id]);
+  const reservados = new Set(mias.map((r) => r.viaje_id));
+  res.render('viajes', { viajes, reservados, zonas: ZONAS, filtro: { zona, llegar: llegarAntes } });
+});
+
+// ---------- H-06: el pasajero reserva un cupo ----------
+app.post('/viajes/:id/reservar', requiereSesion, async (req, res) => {
+  const viajeId = Number(req.params.id);
+  const pasajeroId = req.session.usuario.id;
+  if (req.session.usuario.rol !== 'pasajero') {
+    avisar(req, 'error', 'Solo los pasajeros pueden reservar cupos.');
+    return res.redirect('/viajes');
+  }
+
+  const cliente = await pool.connect();
+  try {
+    await cliente.query('BEGIN');
+    const ya = await cliente.query('SELECT 1 FROM reservas WHERE viaje_id = $1 AND pasajero_id = $2', [viajeId, pasajeroId]);
+    if (ya.rowCount > 0) {
+      await cliente.query('ROLLBACK');
+      avisar(req, 'error', 'Ya tienes un cupo en este viaje');
+      return res.redirect('/viajes');
+    }
+    // Descuenta el cupo solo si todavía queda alguno (operación atómica).
+    const descuento = await cliente.query(
+      'UPDATE viajes SET cupos_libres = cupos_libres - 1 WHERE id = $1 AND cupos_libres > 0 RETURNING zona',
+      [viajeId]
+    );
+    if (descuento.rowCount === 0) {
+      await cliente.query('ROLLBACK');
+      avisar(req, 'error', 'No se pudo reservar este viaje.');
+      return res.redirect('/viajes');
+    }
+    await cliente.query('INSERT INTO reservas (viaje_id, pasajero_id) VALUES ($1, $2)', [viajeId, pasajeroId]);
+    await cliente.query('COMMIT');
+    avisar(req, 'ok', `¡Listo! Reservaste un cupo en el viaje desde ${descuento.rows[0].zona}.`);
+    res.redirect('/mis-reservas');
+  } catch (err) {
+    await cliente.query('ROLLBACK');
+    if (err.code === '23505') { // reserva duplicada al mismo tiempo
+      avisar(req, 'error', 'Ya tienes un cupo en este viaje');
+      return res.redirect('/viajes');
+    }
+    throw err;
+  } finally {
+    cliente.release();
+  }
+});
+
+app.get('/mis-reservas', requiereSesion, async (req, res) => {
+  const { rows: reservas } = await pool.query(
+    `SELECT r.id AS reserva_id, v.zona, to_char(v.fecha, 'DD/MM/YYYY') AS fecha_texto,
+            to_char(v.hora_salida, 'HH24:MI') AS salida, to_char(v.hora_llegada, 'HH24:MI') AS llegada,
+            u.nombre AS conductor
+       FROM reservas r
+       JOIN viajes v ON v.id = r.viaje_id
+       JOIN usuarios u ON u.id = v.conductor_id
+      WHERE r.pasajero_id = $1
+      ORDER BY v.fecha, v.hora_llegada`,
+    [req.session.usuario.id]
+  );
+  res.render('mis-reservas', { reservas });
 });
 
 module.exports = { app, requiereSesion, avisar };
