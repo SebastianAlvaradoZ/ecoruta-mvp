@@ -195,9 +195,12 @@ app.post('/viajes/:id/reservar', requiereSesion, async (req, res) => {
       'UPDATE viajes SET cupos_libres = cupos_libres - 1 WHERE id = $1 AND cupos_libres > 0 RETURNING zona',
       [viajeId]
     );
+    // ---------- H-07: un viaje lleno no acepta más reservas ----------
+    // Si dos personas piden el último cupo a la vez, PostgreSQL solo deja pasar una
+    // actualización; la otra encuentra cupos_libres = 0 y recibe este mensaje.
     if (descuento.rowCount === 0) {
       await cliente.query('ROLLBACK');
-      avisar(req, 'error', 'No se pudo reservar este viaje.');
+      avisar(req, 'error', 'El viaje ya está lleno');
       return res.redirect('/viajes');
     }
     await cliente.query('INSERT INTO reservas (viaje_id, pasajero_id) VALUES ($1, $2)', [viajeId, pasajeroId]);
