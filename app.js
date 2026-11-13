@@ -255,4 +255,31 @@ app.get('/viajes/:id/pasajeros', requiereSesion, async (req, res) => {
   res.render('pasajeros', { viaje, pasajeros });
 });
 
+// ---------- H-09: el pasajero cancela su reserva y libera el cupo ----------
+app.post('/reservas/:id/cancelar', requiereSesion, async (req, res) => {
+  const cliente = await pool.connect();
+  try {
+    await cliente.query('BEGIN');
+    // Solo se borra si la reserva es del usuario que la cancela.
+    const borrada = await cliente.query(
+      'DELETE FROM reservas WHERE id = $1 AND pasajero_id = $2 RETURNING viaje_id',
+      [Number(req.params.id), req.session.usuario.id]
+    );
+    if (borrada.rowCount === 0) {
+      await cliente.query('ROLLBACK');
+      avisar(req, 'error', 'No se encontró esa reserva.');
+      return res.redirect('/mis-reservas');
+    }
+    await cliente.query('UPDATE viajes SET cupos_libres = cupos_libres + 1 WHERE id = $1', [borrada.rows[0].viaje_id]);
+    await cliente.query('COMMIT');
+    avisar(req, 'ok', 'Cancelaste tu reserva. El cupo quedó libre para otro compañero.');
+    res.redirect('/mis-reservas');
+  } catch (err) {
+    await cliente.query('ROLLBACK');
+    throw err;
+  } finally {
+    cliente.release();
+  }
+});
+
 module.exports = { app, requiereSesion, avisar };

@@ -12,6 +12,9 @@
       <h2><%= r.zona %> → Tecsup</h2>
       <p class="horas"><strong><%= r.fecha_texto %></strong> · Sale <%= r.salida %> · Llega <%= r.llegada %></p>
       <p class="muted">Conductor: <%= r.conductor %></p>
+      <form method="post" action="/reservas/<%= r.reserva_id %>/cancelar">
+        <button class="secundario" type="submit">Cancelar reserva</button>
+      </form>
     </article>
   <% }) %>
 </div>
