@@ -1,0 +1,16 @@
+<%- include('partials/cabecera') %>
+<section class="tarjeta">
+  <h1><%= viaje.zona %> → Tecsup</h1>
+  <p class="horas"><strong><%= viaje.fecha_texto %></strong> · Sale <%= viaje.salida %> · Llega <%= viaje.llegada %></p>
+  <p class="sub">Cupos restantes: <strong><%= viaje.cupos_libres %></strong> de <%= viaje.cupos %></p>
+  <h2>Pasajeros que van</h2>
+  <% if (pasajeros.length === 0) { %>
+    <p class="muted">Todavía nadie reservó este viaje.</p>
+  <% } else { %>
+    <ol class="pasajeros">
+      <% pasajeros.forEach(function (p) { %><li><%= p.nombre %></li><% }) %>
+    </ol>
+  <% } %>
+  <a class="muted" href="/viajes">← Volver a los viajes</a>
+</section>
+<%- include('partials/pie') %>

@@ -234,4 +234,25 @@ app.get('/mis-reservas', requiereSesion, async (req, res) => {
   res.render('mis-reservas', { reservas });
 });
 
+// ---------- H-08: el conductor ve quién va en su viaje ----------
+app.get('/viajes/:id/pasajeros', requiereSesion, async (req, res) => {
+  const { rows } = await pool.query(
+    `SELECT v.*, to_char(v.fecha, 'DD/MM/YYYY') AS fecha_texto,
+            to_char(v.hora_salida, 'HH24:MI') AS salida, to_char(v.hora_llegada, 'HH24:MI') AS llegada
+       FROM viajes v WHERE v.id = $1`,
+    [Number(req.params.id)]
+  );
+  const viaje = rows[0];
+  // Solo el conductor dueño del viaje puede ver la lista de pasajeros.
+  if (!viaje || viaje.conductor_id !== req.session.usuario.id) {
+    return res.status(403).render('no-permitido');
+  }
+  const { rows: pasajeros } = await pool.query(
+    `SELECT u.nombre FROM reservas r JOIN usuarios u ON u.id = r.pasajero_id
+      WHERE r.viaje_id = $1 ORDER BY r.creado_en`,
+    [viaje.id]
+  );
+  res.render('pasajeros', { viaje, pasajeros });
+});
+
 module.exports = { app, requiereSesion, avisar };
