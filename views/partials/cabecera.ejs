@@ -11,6 +11,8 @@
     <a class="marca" href="/">Eco<span>Ruta</span></a>
     <% if (usuario) { %>
       <nav>
+        <a href="/viajes">Buscar viajes</a>
+        <% if (usuario.rol === 'conductor') { %><a href="/viajes/nuevo">Publicar viaje</a><% } %>
         <span class="quien"><%= usuario.nombre %> · <%= usuario.rol %></span>
         <form method="post" action="/logout"><button class="enlace" type="submit">Cerrar sesión</button></form>
       </nav>

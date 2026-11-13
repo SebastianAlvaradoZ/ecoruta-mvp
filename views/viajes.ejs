@@ -1,0 +1,21 @@
+<%- include('partials/cabecera') %>
+<section class="tarjeta">
+  <h1>Viajes próximos</h1>
+  <p class="sub">Viajes publicados por compañeros de Tecsup, ordenados por hora de llegada.</p>
+</section>
+<% if (viajes.length === 0) { %>
+  <section class="tarjeta vacio">Aún no hay viajes publicados</section>
+<% } %>
+<div class="lista">
+  <% viajes.forEach(function (v) { %>
+    <article class="tarjeta viaje">
+      <div class="viaje-cabeza">
+        <h2><%= v.zona %> → Tecsup</h2>
+        <span class="chip"><%= v.cupos_libres %> de <%= v.cupos %> cupos libres</span>
+      </div>
+      <p class="horas"><strong><%= v.fecha_texto %></strong> · Sale <%= v.salida %> · Llega <%= v.llegada %></p>
+      <p class="muted">Conductor: <%= v.conductor %></p>
+    </article>
+  <% }) %>
+</div>
+<%- include('partials/pie') %>
