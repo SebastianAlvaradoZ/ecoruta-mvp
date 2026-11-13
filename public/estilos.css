@@ -50,3 +50,10 @@ button.secundario { background: #fff; color: var(--rojo); border: 1px solid var(
 .pie { text-align: center; color: var(--gris); font-size: .85rem; padding: 24px; }
 .muted { color: var(--gris); }
 .fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.lista { display: grid; gap: 12px; }
+.viaje h2 { margin: 0; font-size: 1.15rem; }
+.viaje-cabeza { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.horas { margin: 8px 0 4px; }
+.chip { background: var(--verde-claro); color: var(--verde); border-radius: 999px; padding: 4px 10px; font-size: .85rem; font-weight: 700; }
+.chip.lleno { background: var(--rojo-claro); color: var(--rojo); }
+.vacio { text-align: center; color: var(--gris); }

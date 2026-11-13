@@ -144,7 +144,20 @@ app.post('/viajes', requiereSesion, soloConductor, async (req, res) => {
     [req.session.usuario.id, zona, fecha, hora_salida, hora_llegada, cupos]
   );
   avisar(req, 'ok', 'Viaje publicado. Tus compañeros de ' + zona + ' ya pueden verlo.');
-  res.redirect('/');
+  res.redirect('/viajes');
+});
+
+// ---------- H-04: lista de viajes próximos ----------
+app.get('/viajes', requiereSesion, async (req, res) => {
+  const { rows: viajes } = await pool.query(
+    `SELECT v.*, to_char(v.hora_salida, 'HH24:MI') AS salida, to_char(v.hora_llegada, 'HH24:MI') AS llegada,
+            to_char(v.fecha, 'DD/MM/YYYY') AS fecha_texto, u.nombre AS conductor
+       FROM viajes v JOIN usuarios u ON u.id = v.conductor_id
+      WHERE v.fecha >= $1
+      ORDER BY v.fecha, v.hora_llegada`,
+    [hoyEnLima()]
+  );
+  res.render('viajes', { viajes });
 });
 
 module.exports = { app, requiereSesion, avisar };

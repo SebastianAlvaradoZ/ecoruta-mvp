@@ -4,6 +4,8 @@
   <p class="sub">Estás usando EcoRuta como <strong><%= usuario.rol %></strong>.</p>
   <% if (usuario.rol === 'conductor') { %>
     <a class="boton" href="/viajes/nuevo">Publicar un viaje</a>
+  <% } else { %>
+    <a class="boton" href="/viajes">Buscar un viaje</a>
   <% } %>
 </section>
 <%- include('partials/pie') %>
