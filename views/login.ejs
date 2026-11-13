@@ -1,0 +1,18 @@
+<%- include('partials/cabecera') %>
+<section class="tarjeta angosta">
+  <h1>Iniciar sesión</h1>
+  <p class="sub">Encuentra compañeros de tu zona y llega a tiempo a clase.</p>
+  <% if (error) { %><div class="aviso error"><%= error %></div><% } %>
+  <form method="post" action="/login">
+    <label>Correo<input type="email" name="email" value="<%= email %>" required></label>
+    <label>Contraseña<input type="password" name="password" required></label>
+    <button type="submit">Entrar</button>
+  </form>
+  <p class="muted">¿No tienes cuenta? <a href="/registro">Regístrate</a></p>
+  <details class="muted"><summary>Usuarios de prueba</summary>
+    <p>Conductor: conductor@ecoruta.test / Conductor123<br>
+    Pasajero: pasajero@ecoruta.test / Pasajero123<br>
+    Pasajero 2: pasajero2@ecoruta.test / Pasajero123</p>
+  </details>
+</section>
+<%- include('partials/pie') %>

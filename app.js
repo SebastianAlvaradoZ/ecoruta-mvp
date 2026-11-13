@@ -40,7 +40,7 @@ function requiereSesion(req, res, next) {
 }
 
 app.get('/', (req, res) => {
-  if (!req.session.usuario) return res.redirect('/registro');
+  if (!req.session.usuario) return res.redirect('/login');
   res.render('inicio');
 });
 
@@ -78,5 +78,27 @@ app.post('/registro', async (req, res) => {
   res.redirect('/');
 });
 
+
+// ---------- H-02: iniciar y cerrar sesión ----------
+app.get('/login', (req, res) => {
+  if (req.session.usuario) return res.redirect('/');
+  res.render('login', { error: null, email: '' });
+});
+
+app.post('/login', async (req, res) => {
+  const email = (req.body.email || '').trim().toLowerCase();
+  const password = req.body.password || '';
+  const { rows } = await pool.query('SELECT * FROM usuarios WHERE email = $1', [email]);
+  const u = rows[0];
+  if (!u || !(await bcrypt.compare(password, u.password_hash))) {
+    return res.status(401).render('login', { error: 'Correo o contraseña incorrectos', email });
+  }
+  req.session.usuario = { id: u.id, nombre: u.nombre, email: u.email, rol: u.rol };
+  res.redirect('/');
+});
+
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => res.redirect('/login'));
+});
 
 module.exports = { app, requiereSesion, avisar };
