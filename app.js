@@ -148,16 +148,25 @@ app.post('/viajes', requiereSesion, soloConductor, async (req, res) => {
 });
 
 // ---------- H-04: lista de viajes próximos ----------
+// ---------- H-05: filtro por zona y por hora a la que necesito llegar ----------
 app.get('/viajes', requiereSesion, async (req, res) => {
+  const zona = ZONAS.includes(req.query.zona) ? req.query.zona : '';
+  const llegarAntes = /^\d{2}:\d{2}$/.test(req.query.llegar || '') ? req.query.llegar : '';
+
+  const condiciones = ['v.fecha >= $1'];
+  const valores = [hoyEnLima()];
+  if (zona) { valores.push(zona); condiciones.push(`v.zona = $${valores.length}`); }
+  if (llegarAntes) { valores.push(llegarAntes); condiciones.push(`v.hora_llegada <= $${valores.length}`); }
+
   const { rows: viajes } = await pool.query(
     `SELECT v.*, to_char(v.hora_salida, 'HH24:MI') AS salida, to_char(v.hora_llegada, 'HH24:MI') AS llegada,
             to_char(v.fecha, 'DD/MM/YYYY') AS fecha_texto, u.nombre AS conductor
        FROM viajes v JOIN usuarios u ON u.id = v.conductor_id
-      WHERE v.fecha >= $1
+      WHERE ${condiciones.join(' AND ')}
       ORDER BY v.fecha, v.hora_llegada`,
-    [hoyEnLima()]
+    valores
   );
-  res.render('viajes', { viajes });
+  res.render('viajes', { viajes, zonas: ZONAS, filtro: { zona, llegar: llegarAntes } });
 });
 
 module.exports = { app, requiereSesion, avisar };

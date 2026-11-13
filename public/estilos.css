@@ -57,3 +57,5 @@ button.secundario { background: #fff; color: var(--rojo); border: 1px solid var(
 .chip { background: var(--verde-claro); color: var(--verde); border-radius: 999px; padding: 4px 10px; font-size: .85rem; font-weight: 700; }
 .chip.lleno { background: var(--rojo-claro); color: var(--rojo); }
 .vacio { text-align: center; color: var(--gris); }
+.filtros { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.filtros label { margin: 0; flex: 1 1 200px; }

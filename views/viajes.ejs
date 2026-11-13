@@ -2,9 +2,26 @@
 <section class="tarjeta">
   <h1>Viajes próximos</h1>
   <p class="sub">Viajes publicados por compañeros de Tecsup, ordenados por hora de llegada.</p>
+  <form class="filtros" method="get" action="/viajes">
+    <label>Zona de salida
+      <select name="zona">
+        <option value="">Todas las zonas</option>
+        <% zonas.forEach(function (z) { %>
+          <option <%= filtro.zona === z ? 'selected' : '' %>><%= z %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Necesito llegar a las
+      <input type="time" name="llegar" value="<%= filtro.llegar %>">
+    </label>
+    <button type="submit">Filtrar</button>
+    <% if (filtro.zona || filtro.llegar) { %><a class="muted" href="/viajes">Quitar filtros</a><% } %>
+  </form>
 </section>
 <% if (viajes.length === 0) { %>
-  <section class="tarjeta vacio">Aún no hay viajes publicados</section>
+  <section class="tarjeta vacio">
+    <% if (filtro.zona || filtro.llegar) { %>No hay viajes que coincidan con tu búsqueda.<% } else { %>Aún no hay viajes publicados<% } %>
+  </section>
 <% } %>
 <div class="lista">
   <% viajes.forEach(function (v) { %>
