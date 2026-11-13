@@ -1,0 +1,18 @@
+<%- include('partials/cabecera') %>
+<section class="tarjeta angosta">
+  <h1>Crear cuenta</h1>
+  <p class="sub">Viaja con compañeros de Tecsup de tu misma zona y llega a tiempo.</p>
+  <% if (error) { %><div class="aviso error"><%= error %></div><% } %>
+  <form method="post" action="/registro">
+    <label>Nombre<input name="nombre" value="<%= datos.nombre || '' %>" required></label>
+    <label>Correo<input type="email" name="email" value="<%= datos.email || '' %>" required></label>
+    <label>Contraseña<input type="password" name="password" minlength="6" required></label>
+    <fieldset class="roles">
+      <legend>¿Cómo vas a usar EcoRuta?</legend>
+      <label class="opcion"><input type="radio" name="rol" value="conductor" <%= datos.rol === 'conductor' ? 'checked' : '' %> required> Conductor: tengo carro y asientos libres</label>
+      <label class="opcion"><input type="radio" name="rol" value="pasajero" <%= datos.rol === 'pasajero' ? 'checked' : '' %>> Pasajero: busco con quién viajar</label>
+    </fieldset>
+    <button type="submit">Crear cuenta</button>
+  </form>
+</section>
+<%- include('partials/pie') %>
