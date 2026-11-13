@@ -2,5 +2,8 @@
 <section class="tarjeta">
   <h1>Hola, <%= usuario.nombre %></h1>
   <p class="sub">Estás usando EcoRuta como <strong><%= usuario.rol %></strong>.</p>
+  <% if (usuario.rol === 'conductor') { %>
+    <a class="boton" href="/viajes/nuevo">Publicar un viaje</a>
+  <% } %>
 </section>
 <%- include('partials/pie') %>

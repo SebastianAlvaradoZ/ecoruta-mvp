@@ -49,3 +49,4 @@ button.secundario { background: #fff; color: var(--rojo); border: 1px solid var(
 .aviso.error { background: var(--rojo-claro); color: var(--rojo); }
 .pie { text-align: center; color: var(--gris); font-size: .85rem; padding: 24px; }
 .muted { color: var(--gris); }
+.fila { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
