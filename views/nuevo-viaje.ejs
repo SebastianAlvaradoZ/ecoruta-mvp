@@ -1,0 +1,24 @@
+<%- include('partials/cabecera') %>
+<section class="tarjeta angosta">
+  <h1>Publicar un viaje</h1>
+  <p class="sub">Indica desde dónde sales y a qué hora llegas a Tecsup.</p>
+  <% if (error) { %><div class="aviso error"><%= error %></div><% } %>
+  <form method="post" action="/viajes">
+    <label>Zona de salida
+      <select name="zona" required>
+        <option value="">Elige tu zona</option>
+        <% zonas.forEach(function (z) { %>
+          <option <%= datos.zona === z ? 'selected' : '' %>><%= z %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Fecha<input type="date" name="fecha" value="<%= datos.fecha || '' %>" required></label>
+    <div class="fila">
+      <label>Hora de salida<input type="time" name="hora_salida" value="<%= datos.hora_salida || '' %>" required></label>
+      <label>Hora estimada de llegada<input type="time" name="hora_llegada" value="<%= datos.hora_llegada || '' %>" required></label>
+    </div>
+    <label>Cupos disponibles (1 a 4)<input type="number" name="cupos" min="1" max="4" value="<%= datos.cupos || 3 %>" required></label>
+    <button type="submit">Publicar viaje</button>
+  </form>
+</section>
+<%- include('partials/pie') %>

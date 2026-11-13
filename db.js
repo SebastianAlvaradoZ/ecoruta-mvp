@@ -24,6 +24,19 @@ async function iniciarBaseDeDatos() {
       creado_en TIMESTAMPTZ NOT NULL DEFAULT now()
     );
   `);
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS viajes (
+      id SERIAL PRIMARY KEY,
+      conductor_id INTEGER NOT NULL REFERENCES usuarios(id),
+      zona TEXT NOT NULL,
+      fecha DATE NOT NULL,
+      hora_salida TIME NOT NULL,
+      hora_llegada TIME NOT NULL,
+      cupos INTEGER NOT NULL CHECK (cupos BETWEEN 1 AND 4),
+      cupos_libres INTEGER NOT NULL CHECK (cupos_libres >= 0),
+      creado_en TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+  `);
   await sembrarUsuariosDePrueba();
 }
 

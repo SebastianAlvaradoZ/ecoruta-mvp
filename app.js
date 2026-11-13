@@ -30,6 +30,17 @@ app.use((req, res, next) => {
   next();
 });
 
+// Zonas de Arequipa desde donde salen los estudiantes (de las entrevistas y el formulario).
+const ZONAS = [
+  'Cayma', 'Cerro Colorado', 'Cercado', 'Hunter', 'José Luis Bustamante y Rivero',
+  'Mariano Melgar', 'Miraflores', 'Paucarpata', 'Sachaca', 'Socabaya', 'Tiabaya', 'Yanahuara',
+];
+
+// Fecha de hoy en hora de Perú (el servidor puede estar en otra zona horaria).
+function hoyEnLima() {
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Lima' });
+}
+
 function avisar(req, tipo, texto) {
   req.session.mensaje = { tipo, texto };
 }
@@ -99,6 +110,41 @@ app.post('/login', async (req, res) => {
 
 app.post('/logout', (req, res) => {
   req.session.destroy(() => res.redirect('/login'));
+});
+
+// ---------- H-03: el conductor publica un viaje ----------
+function soloConductor(req, res, next) {
+  if (req.session.usuario.rol !== 'conductor') {
+    avisar(req, 'error', 'Solo los conductores pueden publicar viajes.');
+    return res.redirect('/');
+  }
+  next();
+}
+
+app.get('/viajes/nuevo', requiereSesion, soloConductor, (req, res) => {
+  res.render('nuevo-viaje', { error: null, datos: { fecha: hoyEnLima() }, zonas: ZONAS });
+});
+
+app.post('/viajes', requiereSesion, soloConductor, async (req, res) => {
+  const { zona, fecha, hora_salida, hora_llegada } = req.body;
+  const cupos = Number(req.body.cupos);
+  const datos = { zona, fecha, hora_salida, hora_llegada, cupos: req.body.cupos };
+  const fallar = (error) => res.status(400).render('nuevo-viaje', { error, datos, zonas: ZONAS });
+
+  if (!ZONAS.includes(zona) || !fecha || !hora_salida || !hora_llegada) {
+    return fallar('Completa la zona, la fecha y las dos horas.');
+  }
+  if (fecha < hoyEnLima()) return fallar('La fecha del viaje no puede estar en el pasado.');
+  if (hora_llegada <= hora_salida) return fallar('La hora de llegada debe ser posterior a la hora de salida.');
+  if (!Number.isInteger(cupos) || cupos < 1 || cupos > 4) return fallar('Los cupos deben estar entre 1 y 4.');
+
+  await pool.query(
+    `INSERT INTO viajes (conductor_id, zona, fecha, hora_salida, hora_llegada, cupos, cupos_libres)
+     VALUES ($1, $2, $3, $4, $5, $6, $6)`,
+    [req.session.usuario.id, zona, fecha, hora_salida, hora_llegada, cupos]
+  );
+  avisar(req, 'ok', 'Viaje publicado. Tus compañeros de ' + zona + ' ya pueden verlo.');
+  res.redirect('/');
 });
 
 module.exports = { app, requiereSesion, avisar };
